@@ -4,9 +4,13 @@
 #define MATRIXLIB_PROJECT_MATH_H
 
 #include <tuple>
-#include <matrixlib/Expression.h>
-
-#define variables std::tuple<Expression<T>*, Expression<T>*>
+#include <matrixlib/math/Radical.h>
+#include <matrixlib/math/Constant.h>
+#include <matrixlib/math/Addition.h>
+#include <matrixlib/math/Multiplication.h>
+#include <matrixlib/math/Division.h>
+#include <matrixlib/math/SQRT.h>
+#include <matrixlib/math/Exponentiation.h>
 
 namespace matrixlib::math {
 
@@ -16,39 +20,53 @@ namespace matrixlib::math {
 
         QuadraticEquation(T _a, T _b, T _c) : a(_a), b(_b), c(_c) {}
 
-        Expression<T> get_discriminant() {
+        Radical<T> get_discriminant() {
+            Addition<T> expression{
+                new Multiplication<T> {
+                    new Constant<T> {b},
+                    new Constant<T> {b},
+                },
+                new Multiplication<T> {
+                    new Constant<T> {-4},
+                    new Constant<T> {a},
+                    new Constant<T> {c},
+                },
+            };
 
-            Expression<T> expression{};
-
-            expression.add(new Constant<T>{b * b});
-            expression.add(new Constant<T>{-4 * a * c});
-
-            return expression.get_simplified();
-
-        }
-
-        T get_vertex_parabola() {
-
-            Expression<T> expression{};
-            expression.add(new Constant<T>{ -b / (2*a) });
-
-            return expression.calculate();
+            return expression;
 
         }
 
-        variables get_solves() {
+        Radical<T> get_vertex_parabola() {
 
-            auto* first = new Expression<T>{};
-            first->add(new Constant<T>{ -b / (2 * a) });
-            first->add(new SQRT<T>{ -1 / (2 * a), this->get_discriminant().calculate() });
-            first->simplify();
+            Division<float> expression {
+                new Multiplication<T> {new Constant<T>{ -1 }, new Constant<T>{ b }},
+                new Multiplication<T> {new Constant<T>{ 2 }, new Constant<T>{ a }},
+            };
 
-            auto* second = new Expression<T>{};
-            second->add(new Constant<T>{ -b / (2 * a) });
-            second->add(new SQRT<T>{ 1 / (2 * a), this->get_discriminant().calculate() });
-            second->simplify();
+            return expression;
 
-            variables coordinates {
+        }
+
+        std::pair<Radical<T>, Radical<T>> get_solves() {
+
+            Division<T> first {
+                new Addition<T> {
+                    new Constant<T> {-b}, new SQRT<T> {this->get_discriminant()},
+                },
+                new Multiplication<T> {2, a},
+            };
+
+            Division<T> second {
+                new Addition<T> {
+                    new Constant<T> {-b}, new Multiplication<float> {
+                        -1, new SQRT<T> {this->get_discriminant()}
+                    },
+                },
+                new Multiplication<T> {2, a},
+            };
+
+            std::pair<Radical<T>, Radical<T>> coordinates {
                 first,
                 second
             };

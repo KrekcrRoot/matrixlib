@@ -7,41 +7,60 @@
 
 #include <numeric>
 
+#include <matrixlib/math/Radical.h>
+#include <matrixlib/math/Addition.h>
+#include <matrixlib/math/Multiplication.h>
+
 using uint = unsigned int;
 
 namespace matrixlib
 {
+
+    using math::Radical;
 
     template<typename T, uint height, uint width>
     struct Matrix
     {
 
         Matrix();
+
+        explicit Matrix(Radical<T>* arr[height][width]);
+        explicit Matrix(Radical<T>* arr[height * width]);
+
         explicit Matrix(T arr[height][width]);
         explicit Matrix(T arr[height * width]);
 
-        void print() const;
+        [[maybe_unused]] void print() const;
 
-        T get(uint x, uint y);
-        T* get_p(uint x, uint y);
+        [[maybe_unused]] [[nodiscard]] Radical<T>* get(uint x, uint y) const;
 
-        T get_determinant();
+        [[maybe_unused]] bool is_square();
 
-        bool is_square();
+        [[maybe_unused]] bool set(uint x, uint y, Radical<T>* value);
+        [[maybe_unused]] bool set(uint x, uint y, T value);
 
-        bool set(uint x, uint y, T value);
-        void set(T arr[height][width]);
+        [[maybe_unused]] Matrix<T, height, width> operator+(const Matrix<T, height, width>& matrix);
+        [[maybe_unused]] Matrix<T, height, width> operator-(const Matrix<T, height, width>& matrix);
 
+        [[maybe_unused]] Matrix<T, height, width> operator*(T multiplier);
+        [[maybe_unused]] Matrix<T, height, width> operator*(Radical<T>* multiplier);
+        [[maybe_unused]] void operator*=(T multiplier);
+        [[maybe_unused]] void operator*=(Radical<T>* multiplier);
 
-        static Matrix<T, height - 1, width - 1> get_submatrix(const Matrix<T, height, width>& matrix, uint i, uint j);
-        Matrix<T, height - 1, width - 1> get_submatrix(uint i, uint j);
+        [[maybe_unused]] void operator+=(const Matrix<T, height, width>& matrix);
+        [[maybe_unused]] void operator-=(const Matrix<T, height, width>& matrix);
 
+        [[maybe_unused]] Matrix<T, width, height> get_transposed();
 
-        void operator*=(T multiplier);
+        [[maybe_unused]] static Matrix<T, height - 1, width - 1> get_submatrix(const Matrix<T, height, width>& matrix, uint i, uint j);
 
-        Matrix<T, height, width> operator+(const Matrix<T, height, width>& matrix);
-        Matrix<T, height, width> operator-(const Matrix<T, height, width>& matrix);
-        Matrix<T, height, width> operator*(T multiplier);
+        [[maybe_unused]] Matrix<T, height - 1, width - 1> get_submatrix(uint i, uint j);
+
+        [[maybe_unused]] math::Addition<T>* get_determinant();
+
+        [[maybe_unused]] Matrix<T, height, width>* get_inverse();
+
+        [[maybe_unused]] void calculate();
 
         template<uint width_c>
         Matrix<T, height, width_c> operator*(const Matrix<T, width, width_c>& matrix) {
@@ -50,9 +69,14 @@ namespace matrixlib
 
             for (int row = 0; row < height; ++row) {
                 for (int column = 0; column < width_c; ++column) {
+                    auto* value = new math::Addition<T>{};
                     for (int i = 0; i < width; ++i) {
-                        result.data[row][column] += this->data[row][i] * matrix.data[i][column];
+                        value->add(new math::Multiplication<T>{
+                            this->data[row][i],
+                            matrix.data[i][column],
+                        });
                     }
+                    result.data[row][column] = value;
                 }
             }
 
@@ -60,23 +84,14 @@ namespace matrixlib
 
         };
 
-        Matrix<T, width, height> get_transposed();
-
-        Matrix<T, height, width>* get_inverse();
-
         /*
 
 
 
 
+*/
 
-
-         * */
-
-        void operator+=(const Matrix<T, height, width>& matrix);
-        void operator-=(const Matrix<T, height, width>& matrix);
-
-        T data[height][width];
+        Radical<T>* data[height][width];
     };
 
 }
