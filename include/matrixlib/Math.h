@@ -20,8 +20,8 @@ namespace matrixlib::math {
 
         QuadraticEquation(T _a, T _b, T _c) : a(_a), b(_b), c(_c) {}
 
-        Radical<T> get_discriminant() {
-            Addition<T> expression{
+        Radical<T>* get_discriminant() {
+            auto* expression = new Addition<T> {
                 new Multiplication<T> {
                     new Constant<T> {b},
                     new Constant<T> {b},
@@ -37,9 +37,9 @@ namespace matrixlib::math {
 
         }
 
-        Radical<T> get_vertex_parabola() {
+        [[maybe_unused]] Radical<T>* get_vertex_parabola() {
 
-            Division<float> expression {
+            auto* expression = new Division<float> {
                 new Multiplication<T> {new Constant<T>{ -1 }, new Constant<T>{ b }},
                 new Multiplication<T> {new Constant<T>{ 2 }, new Constant<T>{ a }},
             };
@@ -48,25 +48,31 @@ namespace matrixlib::math {
 
         }
 
-        std::pair<Radical<T>, Radical<T>> get_solves() {
+        std::pair<Radical<T>*, Radical<T>*> get_solves() {
 
-            Division<T> first {
+            auto* first = new Division<T> {
                 new Addition<T> {
                     new Constant<T> {-b}, new SQRT<T> {this->get_discriminant()},
                 },
-                new Multiplication<T> {2, a},
+                new Multiplication<T> {
+                    new Constant<T> {2},
+                    new Constant<T> {a},
+                },
             };
 
-            Division<T> second {
+            auto* second = new Division<T> {
                 new Addition<T> {
                     new Constant<T> {-b}, new Multiplication<float> {
-                        -1, new SQRT<T> {this->get_discriminant()}
+                        new Constant<T> {-1}, new SQRT<T> {this->get_discriminant()}
                     },
                 },
-                new Multiplication<T> {2, a},
+                new Multiplication<T> {
+                    new Constant<T> {2},
+                    new Constant<T> {a},
+                },
             };
 
-            std::pair<Radical<T>, Radical<T>> coordinates {
+            std::pair<Radical<T>*, Radical<T>*> coordinates {
                 first,
                 second
             };
