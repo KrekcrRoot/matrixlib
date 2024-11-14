@@ -72,16 +72,41 @@ template_matrix
 void XMatrix::print() const
 {
 
-    unsigned int previous_size = 1;
+
     for (uint y = 0; y < height; ++y) {
-        cout << "| ";
-        for (uint x = 0; x < width; ++x) {
-            std::string value = this->data[y][x]->get_string();
-            cout << value << "\t";
-            previous_size = value.length();
+
+        std::string row {};
+
+        if(height == 1) {
+          row += "[ ";
+        } else if (y == 0) {
+            row += "⎡ ";
+        } else if (y == height - 1) {
+            row += "⎣ ";
+        } else {
+            row += "⎢ ";
         }
-        cout << "|\n";
+
+        for (uint x = 0; x < width; ++x) {
+            row += this->data[y][x]->get_string();
+            if(x != width - 1) row += " ";
+        }
+
+        if(height == 1) {
+            row += " ]";
+        } else if (y == 0) {
+            row += " ⎤";
+        } else if (y == height - 1) {
+            row += " ⎦";
+        } else {
+            row += " ⎥";
+        }
+
+        cout << row << "\n";
+
     }
+
+    cout << "\n";
 
 };
 
@@ -381,4 +406,107 @@ XMatrix* XMatrix::get_inverse() {
 
 }
 
+template_matrix
+std::vector<Radical<T>*> XMatrix::get_eigenvalues() {
 
+    if (height != width)
+        return {};
+
+    if (width == 2) {
+        math::QuadraticEquation<T> equation {
+            new math::Constant<T> {1},
+            new math::Multiplication<T> {
+                new math::Constant<T> {-1},
+                new math::Addition<T> {
+                    data[0][0],
+                    data[1][1],
+                },
+            },
+            new math::Addition<T> {
+                new math::Multiplication<T> {
+                    new math::Constant<T> {-1},
+                    data[0][1],
+                    data[1][0],
+                },
+                new math::Multiplication<T> {
+                    data[0][0],
+                    data[1][1],
+                }
+            }
+        };
+
+        auto solves = equation.get_solves();
+        return std::vector<Radical<T>*> {solves.first, solves.second};
+    }
+
+}
+
+template_matrix
+XMatrix XMatrix::get_own_matrix() {
+
+    if(!this->is_square())
+        throw std::runtime_error("Matrix isn't square");
+
+    std::vector<Radical<T>*> eigenvalues = this->get_eigenvalues();
+
+    XMatrix result{};
+
+    for (uint i = 0; i < width; ++i) {
+
+        auto* x_lambda = new math::Addition<T> {
+            data[0][0],
+            new math::Multiplication<T> {new math::Constant<T> {-1}, eigenvalues[i]},
+        };
+
+        auto* y_lambda = new math::Multiplication<T> {
+            new math::Constant<T> {-1},
+            data[0][1],
+        };
+
+        if (abs(x_lambda->calculate()) < abs(y_lambda->calculate())) {
+
+            auto* x = new math::Division<T> {
+                y_lambda,
+                x_lambda,
+            };
+
+            result.set(i + 1, 1, x);
+
+            auto* y = new math::Division<T> {
+
+                new math::Multiplication<T> {
+                    x_lambda,
+                    x,
+                },
+
+                y_lambda,
+
+            };
+
+            result.set(i + 1, 2, y);
+
+        } else {
+
+            auto* y = new math::Division<T> {
+                x_lambda,
+                y_lambda,
+            };
+
+            result.set(i + 1, 2, y);
+
+            auto* x = new math::Division<T> {
+                new math::Multiplication<T> {
+                    y_lambda, y,
+                },
+                x_lambda
+            };
+
+            result.set(i + 1, 1, x);
+
+        }
+
+    }
+
+    return result;
+
+}

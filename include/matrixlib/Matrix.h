@@ -10,6 +10,7 @@
 #include <matrixlib/math/Radical.h>
 #include <matrixlib/math/Addition.h>
 #include <matrixlib/math/Multiplication.h>
+#include <matrixlib/math/Constant.h>
 
 using uint = unsigned int;
 
@@ -23,6 +24,20 @@ namespace matrixlib
     {
 
         Matrix();
+
+        template<class... Args>
+        explicit Matrix(Args... args) {
+            std::array<T, sizeof...(args)> array {(T) args ...};
+
+            uint x = 0, y = 0;
+            for (size_t i = 0; i < width * height; ++i) {
+                data[y][x] = new math::Constant<T>{array[i]};
+
+                ++x;
+                x >= width && ({x = 0; ++y;});
+            }
+
+        }
 
         explicit Matrix(Radical<T>* arr[height][width]);
         explicit Matrix(Radical<T>* arr[height * width]);
@@ -53,11 +68,13 @@ namespace matrixlib
         [[maybe_unused]] Matrix<T, width, height> get_transposed();
 
         [[maybe_unused]] static Matrix<T, height - 1, width - 1> get_submatrix(const Matrix<T, height, width>& matrix, uint i, uint j);
-
         [[maybe_unused]] Matrix<T, height - 1, width - 1> get_submatrix(uint i, uint j);
 
         [[maybe_unused]] math::Addition<T>* get_determinant();
 
+        [[maybe_unused]] std::vector<Radical<T>*> get_eigenvalues();
+
+        [[maybe_unused]] Matrix<T, height, width> get_own_matrix();
         [[maybe_unused]] Matrix<T, height, width>* get_inverse();
 
         [[maybe_unused]] void calculate();

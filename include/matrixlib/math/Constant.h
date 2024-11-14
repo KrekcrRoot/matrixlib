@@ -23,7 +23,12 @@ namespace matrixlib::math {
         }
 
         std::string get_string() override {
-            return std::to_string(data);
+            std::string value = std::to_string(data);
+            while (value.ends_with('0')) {
+                value.pop_back();
+            }
+            if(value.ends_with('.')) value.pop_back();
+            return value;
         }
 
         T data;

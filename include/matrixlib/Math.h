@@ -18,30 +18,30 @@ namespace matrixlib::math {
     template<typename T>
     struct QuadraticEquation {
 
-        QuadraticEquation(T _a, T _b, T _c) : a(_a), b(_b), c(_c) {}
+        QuadraticEquation(Radical<T>* _a, Radical<T>* _b, Radical<T>* _c)
+            : a{_a}, b{_b}, c{_c}
+        {}
+
+        QuadraticEquation(T _a, T _b, T _c) {
+            a = new Constant<T> {_a};
+            b = new Constant<T> {_b};
+            c = new Constant<T> {_c};
+        }
 
         Radical<T>* get_discriminant() {
             auto* expression = new Addition<T> {
-                new Multiplication<T> {
-                    new Constant<T> {b},
-                    new Constant<T> {b},
-                },
-                new Multiplication<T> {
-                    new Constant<T> {-4},
-                    new Constant<T> {a},
-                    new Constant<T> {c},
-                },
+                new Multiplication<T> { b, b },
+                new Multiplication<T> { new Constant<T> {-4}, a, c },
             };
 
             return expression;
-
         }
 
         [[maybe_unused]] Radical<T>* get_vertex_parabola() {
 
             auto* expression = new Division<float> {
-                new Multiplication<T> {new Constant<T>{ -1 }, new Constant<T>{ b }},
-                new Multiplication<T> {new Constant<T>{ 2 }, new Constant<T>{ a }},
+                new Multiplication<T> {new Constant<T>{ -1 }, b},
+                new Multiplication<T> {new Constant<T>{ 2 }, a},
             };
 
             return expression;
@@ -52,24 +52,20 @@ namespace matrixlib::math {
 
             auto* first = new Division<T> {
                 new Addition<T> {
-                    new Constant<T> {-b}, new SQRT<T> {this->get_discriminant()},
+                    new Multiplication<T> {new Constant<T> {-1}, b},
+                    new SQRT<T> {this->get_discriminant()},
                 },
-                new Multiplication<T> {
-                    new Constant<T> {2},
-                    new Constant<T> {a},
-                },
+                new Multiplication<T> { new Constant<T> {2}, a },
             };
 
             auto* second = new Division<T> {
                 new Addition<T> {
-                    new Constant<T> {-b}, new Multiplication<float> {
+                    new Multiplication<T> {new Constant<T> {-1}, b},
+                    new Multiplication<T> {
                         new Constant<T> {-1}, new SQRT<T> {this->get_discriminant()}
                     },
                 },
-                new Multiplication<T> {
-                    new Constant<T> {2},
-                    new Constant<T> {a},
-                },
+                new Multiplication<T> { new Constant<T> {2}, a },
             };
 
             std::pair<Radical<T>*, Radical<T>*> coordinates {
@@ -82,7 +78,9 @@ namespace matrixlib::math {
         }
         
 
-        T a = 0, b = 0, c = 0;
+        Radical<T>* a;
+        Radical<T>* b;
+        Radical<T>* c;
 
     };
 

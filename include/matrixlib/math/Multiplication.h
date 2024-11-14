@@ -18,6 +18,11 @@ namespace matrixlib::math {
             this->data = std::vector<Radical<T>*> {args ...};
         }
 
+//        template<class... Args>
+//        explicit Multiplication(Args... args) {
+//            this->data = std::vector<Radical<T>*> {args ...};
+//        }
+
         T calculate() override {
 
             T result{1};
