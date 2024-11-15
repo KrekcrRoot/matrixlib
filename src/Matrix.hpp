@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <random>
 
 #include <matrixlib/Math.h>
 
@@ -371,17 +372,19 @@ void XMatrix::calculate() {
 }
 
 template_matrix
-XMatrix* XMatrix::get_inverse() {
+XMatrix XMatrix::get_inverse() {
 
     if (width != height)
-        return nullptr;
+        throw std::runtime_error("Matrix isn't square");
 
     math::Addition<T>* determinant = this->get_determinant();
 
     if (determinant->calculate() == 0)
-        return nullptr;
+        throw std::runtime_error("Determinant equals zero");
 
-    auto* transposed = new Matrix<T, height, width> {this->get_transposed()};
+    Matrix<T, height, width> transposed = this->get_transposed();
+
+//    auto* transposed = new Matrix<T, height, width> {this->get_transposed()};
 
     for (uint y = 0; y < height; ++y)
     {
@@ -398,7 +401,7 @@ XMatrix* XMatrix::get_inverse() {
                 determinant,
             };
 
-            transposed->data[x][y] = value;
+            transposed.data[x][y] = value;
         }
     }
 
@@ -506,6 +509,27 @@ XMatrix XMatrix::get_own_matrix() {
         }
 
     }
+
+    return result;
+
+}
+
+template_matrix
+XMatrix XMatrix::random(Random<T> range) {
+
+    XMatrix result {};
+
+    std::random_device rd{};
+    std::mt19937 mt199371 {rd()};
+    std::uniform_int_distribution<int> distribution {(int) range.leftRange, (int) range.rightRange};
+
+
+    for (uint y = 0; y < height; ++y) {
+        for (uint x = 0; x < width; ++x) {
+            result.set(x + 1, y + 1, new math::Constant<T>{(double) distribution(rd)});
+        }
+    }
+
 
     return result;
 

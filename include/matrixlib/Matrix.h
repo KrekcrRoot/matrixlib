@@ -11,6 +11,7 @@
 #include <matrixlib/math/Addition.h>
 #include <matrixlib/math/Multiplication.h>
 #include <matrixlib/math/Constant.h>
+#include <matrixlib/random/Random.h>
 
 using uint = unsigned int;
 
@@ -18,6 +19,7 @@ namespace matrixlib
 {
 
     using math::Radical;
+    using random::Random;
 
     template<typename T, uint height, uint width>
     struct Matrix
@@ -75,7 +77,7 @@ namespace matrixlib
         [[maybe_unused]] std::vector<Radical<T>*> get_eigenvalues();
 
         [[maybe_unused]] Matrix<T, height, width> get_own_matrix();
-        [[maybe_unused]] Matrix<T, height, width>* get_inverse();
+        [[maybe_unused]] Matrix<T, height, width> get_inverse();
 
         [[maybe_unused]] void calculate();
 
@@ -100,6 +102,8 @@ namespace matrixlib
             return result;
 
         };
+
+        static Matrix<T, height, width> random(Random<T> range);
 
         /*
 
